@@ -6,8 +6,6 @@ import Desc from "./Desc";
 import Home from "./Home";
 import Navbar from "./Navbar";
 
-import Loader from "./Loader";
-
 function App(props) {
   // console.log(props);
   return (
