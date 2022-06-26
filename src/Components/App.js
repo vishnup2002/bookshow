@@ -1,8 +1,12 @@
 import { connect } from "react-redux";
-import { BrowserRouter, Route, Router, Routes, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
+import "./loader.css";
+import Desc from "./Desc";
 import Home from "./Home";
 import Navbar from "./Navbar";
+
+import Loader from "./Loader";
 
 function App(props) {
   // console.log(props);
@@ -13,7 +17,10 @@ function App(props) {
 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/show/:id" element={<Desc />} />
         </Routes>
+
+        {/* <Loader /> */}
       </div>
     </BrowserRouter>
   );

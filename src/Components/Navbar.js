@@ -1,23 +1,28 @@
 import React, { Component } from "react";
 import { auth } from "../Services/firebase";
-// import { signIn } from "../Services/firebase";
+
 import defaultUserIcon from "../Static/defaultUserIcon.jpg";
 import {
   getAuth,
-  signInWithPopup,
   GoogleAuthProvider,
   signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { setUser } from "../Actions/user";
+import { delUser, setUser } from "../Actions/user";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
 class Navbar extends Component {
   signIn = () => {
     const provider = new GoogleAuthProvider();
-
+    this.setState((prevState) => {
+      return {
+        ...prevState,
+        isLoggingIn: true,
+      };
+    });
     const auth = getAuth();
     signInWithRedirect(auth, provider);
   };
@@ -34,6 +39,7 @@ class Navbar extends Component {
             photourl: null,
           },
         });
+        this.props.dispatch(delUser());
       })
       .catch((error) => {
         //error
@@ -49,6 +55,7 @@ class Navbar extends Component {
         photourl: null,
       },
       isLoggedIn: false,
+      isLoggingIn: false,
     };
   }
 
@@ -58,6 +65,8 @@ class Navbar extends Component {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in.
+        this.props.dispatch(setUser(user));
+
         this.setState({
           ...this.state,
           user: {
@@ -65,21 +74,28 @@ class Navbar extends Component {
             photourl: user.photoURL,
           },
           isLoggedIn: true,
+          isLoggingIn: false,
         });
       } else {
         // No user is signed in.
+
         getRedirectResult(auth)
           .then((result) => {
-            const user = result.user;
-            if (user) {
-              this.setState({
-                ...this.state,
-                user: {
-                  name: user.displayName,
-                  photourl: user.photoURL,
-                },
-                isLoggedIn: true,
-              });
+            if (result) {
+              const user = result.user;
+
+              if (user) {
+                this.props.dispatch(setUser(user));
+                this.setState({
+                  ...this.state,
+                  user: {
+                    name: user.displayName,
+                    photourl: user.photoURL,
+                  },
+                  isLoggedIn: true,
+                  isLoggingIn: false,
+                });
+              }
             }
           })
           .catch((error) => {
@@ -91,67 +107,54 @@ class Navbar extends Component {
   render() {
     return (
       <div>
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
           <div className="container-fluid">
-            <a className="navbar-brand" href="#">
+            <Link className="navbar-brand" to="/">
               B0okSh0W
-            </a>
+            </Link>
 
             <div className="collapse navbar-collapse" id="navbarScroll">
               <ul
                 className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll"
                 style={{ "--bs-scroll-height": "100px" }}
               >
-                <li className="nav-item">
-                  <a className="nav-link active" aria-current="page" href="#">
-                    Home
-                  </a>
-                </li>
-
                 <li className="nav-item dropdown">
-                  <a
+                  <span
                     className="nav-link dropdown-toggle"
-                    href="#"
                     id="navbarScrollingDropdown"
                     role="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
                     Current
-                  </a>
+                  </span>
                   <ul
                     className="dropdown-menu"
                     aria-labelledby="navbarScrollingDropdown"
                   >
                     <li>
-                      <a className="dropdown-item" href="#">
-                        Current
-                      </a>
+                      <span className="dropdown-item">Current</span>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
-                        Upcoming
-                      </a>
+                      <span className="dropdown-item">Upcoming</span>
                     </li>
                     <li>
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
-                        Past
-                      </a>
+                      <span className="dropdown-item">Past</span>
                     </li>
                   </ul>
                 </li>
               </ul>
               <form className="d-flex w-100 me-5">
                 <input
-                  className="form-control me-2 w-80"
+                  className="form-control me-2 w-80 bg-dark border-top-0 border-start-0 border-end-0 border-primary text-muted"
                   type="search"
                   placeholder="Search"
                   aria-label="Search"
                 />
-                <button className="btn btn-outline-success" type="submit">
+                <button className="btn btn-outline-primary" type="submit">
                   Search
                 </button>
               </form>
@@ -172,13 +175,12 @@ class Navbar extends Component {
                   <ul className="d-inline">
                     <li
                       className="nav-link dropdown-toggle d-inline"
-                      href="#"
                       id="navbarScrollingDropdown"
                       role="button"
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
                     >
-                      <a className="navbar-brand" href="#">
+                      <span className="navbar-brand">
                         <img
                           src={
                             this.state.user.photourl
@@ -188,9 +190,12 @@ class Navbar extends Component {
                           alt=""
                           width="50"
                           height="40"
-                          className="rounded-circle"
+                          className={
+                            "rounded-circle " +
+                            (this.state.isLoggingIn ? "logging-in" : "")
+                          }
                         />
-                      </a>
+                      </span>
                     </li>
 
                     <ul
@@ -202,7 +207,6 @@ class Navbar extends Component {
                           <button
                             onClick={this.logOut}
                             className="dropdown-item"
-                            href="#"
                           >
                             SignOut
                           </button>
@@ -210,7 +214,6 @@ class Navbar extends Component {
                           <button
                             onClick={this.signIn}
                             className="dropdown-item"
-                            href="#"
                           >
                             SignIn / SignUp
                           </button>

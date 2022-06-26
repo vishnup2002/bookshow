@@ -1,7 +1,24 @@
 import React, { Component } from "react";
+import DemoCarousel from "./Carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import ShowsList from "./ShowsList";
+import { connect } from "react-redux";
 
-export default class Home extends Component {
+class Home extends Component {
   render() {
-    return <div>Home</div>;
+    return (
+      <div className="cards-container">
+        <DemoCarousel />
+        <div id="trending-shows">
+          <h1 className="p-5 cards-container-heading">Trending Shows</h1>
+          <ShowsList />
+        </div>
+      </div>
+    );
   }
 }
+
+export default connect(() => {
+  return {};
+})(Home);
+// ReactDOM.render(<DemoCarousel />, document.querySelector(".demo-carousel"));
