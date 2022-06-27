@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { auth } from "../Services/firebase";
+import jQuery from "jquery";
 
 import defaultUserIcon from "../Static/defaultUserIcon.jpg";
 import {
@@ -7,7 +8,6 @@ import {
   GoogleAuthProvider,
   signInWithRedirect,
   getRedirectResult,
-  onAuthStateChanged,
   signOut,
 } from "firebase/auth";
 import { delUser, setUser } from "../Actions/user";
@@ -60,49 +60,43 @@ class Navbar extends Component {
   }
 
   componentDidMount() {
-    const auth = getAuth();
+    if (!jQuery.isEmptyObject(this.props.user)) {
+      let user = this.props.user;
+      this.props.dispatch(setUser(user));
+      this.setState({
+        ...this.state,
+        user: {
+          name: user.displayName,
+          photourl: user.photoURL,
+        },
+        isLoggedIn: true,
+        isLoggingIn: false,
+      });
+    }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in.
-        this.props.dispatch(setUser(user));
+    getRedirectResult(auth)
+      .then((result) => {
+        if (!jQuery.isEmptyObject(result) && !this.state.user.name) {
+          const auth = getAuth();
+          const user = auth.currentUser;
 
-        this.setState({
-          ...this.state,
-          user: {
-            name: user.displayName,
-            photourl: user.photoURL,
-          },
-          isLoggedIn: true,
-          isLoggingIn: false,
-        });
-      } else {
-        // No user is signed in.
-
-        getRedirectResult(auth)
-          .then((result) => {
-            if (result) {
-              const user = result.user;
-
-              if (user) {
-                this.props.dispatch(setUser(user));
-                this.setState({
-                  ...this.state,
-                  user: {
-                    name: user.displayName,
-                    photourl: user.photoURL,
-                  },
-                  isLoggedIn: true,
-                  isLoggingIn: false,
-                });
-              }
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    });
+          if (user) {
+            this.props.dispatch(setUser(user));
+            this.setState({
+              ...this.state,
+              user: {
+                name: user.displayName,
+                photourl: user.photoURL,
+              },
+              isLoggedIn: true,
+              isLoggingIn: false,
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
   render() {
     return (
@@ -188,7 +182,7 @@ class Navbar extends Component {
                               : defaultUserIcon
                           }
                           alt=""
-                          width="50"
+                          width="40"
                           height="40"
                           className={
                             "rounded-circle " +

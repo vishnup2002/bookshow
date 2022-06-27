@@ -60,7 +60,7 @@ function Desc(props) {
 
 function mapStateToProps(state) {
   return {
-    movies: state.movies.results,
+    movies: state.movies,
   };
 }
 

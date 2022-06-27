@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { addMovies } from "../Actions/shows";
 import Loader from "./Loader";
+import jQuery from "jquery";
 
 class ShowsList extends Component {
   constructor(props) {
@@ -17,12 +18,12 @@ class ShowsList extends Component {
     const options = {
       method: "GET",
       headers: {
-        "X-RapidAPI-Key": "6d818dd73fmsh03053c5692d3ec0p16e8efjsn13f0c81f2e25",
+        "X-RapidAPI-Key": "c738b04556msh0a70587d7451789p1c492ejsn4f5566bc997d",
         "X-RapidAPI-Host": "streaming-availability.p.rapidapi.com",
       },
     };
 
-    if (!this.props.movies) {
+    if (jQuery.isEmptyObject(this.props.movies)) {
       fetch(
         "https://streaming-availability.p.rapidapi.com/search/basic?country=us&service=netflix&type=movie&genre=18&page=1&output_language=en&language=en",
         options
@@ -30,7 +31,7 @@ class ShowsList extends Component {
         .then((response) => response.json())
         .then((response) => {
           console.log(response);
-          this.props.dispatch(addMovies(response));
+          this.props.dispatch(addMovies(response.results));
           this.setState({
             movies: response.results,
             loading: false,
@@ -96,7 +97,7 @@ class ShowsList extends Component {
 
 function mapStateToProps(state) {
   return {
-    movies: state.movies.results,
+    movies: state.movies,
   };
 }
 export default connect(mapStateToProps)(ShowsList);

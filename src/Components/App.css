@@ -95,7 +95,7 @@ body,
 }
 
 .logging-in {
-  animation: grow-shrink 1s linear infinite;
+  animation: grow-shrink 0.7s linear infinite;
 }
 
 @keyframes grow-shrink {
@@ -104,7 +104,7 @@ body,
   }
 
   50% {
-    transform: scale(0.25);
+    transform: scale(0.7);
   }
 
   100% {
